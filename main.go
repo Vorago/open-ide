@@ -124,20 +124,18 @@ func openProject(idePath string, projectPath string) {
 
 func intersect(a []string, b []string) []string {
 	res := make([]string, 0)
+
+	hash := make(map[string]bool)
+
+	for _, v := range b {
+		hash[v] = true
+	}
+
 	for i := 0; i < len(a); i++ {
-		if contains(b, a[i]) {
+		if hash[a[i]] {
 			res = append(res, a[i])
 		}
 	}
 
 	return res
-}
-
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
 }
