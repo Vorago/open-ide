@@ -22,8 +22,6 @@ func main() {
 
 	*maxDepth += strings.Count(*rootDir, string(os.PathSeparator))
 
-	fmt.Println(*maxDepth)
-	fmt.Println(*rootDir)
 	projectNames := searchProjects(*rootDir, *maxDepth)
 	projectName := pickProject(projectNames)
 
@@ -63,7 +61,7 @@ func searchProjects(rootDir string, maxDepth int) []string {
 
 func searchWindow(projectName string) []string {
 	windowName := filepath.Base(projectName)
-	byName, err := exec.Command("xdotool", "search", "--name", windowName).Output()
+	byName, err := exec.Command("xdotool", "search", "--name", projectRegexp(windowName)).Output()
 	if err != nil {
 		return make([]string, 0)
 	}
@@ -77,6 +75,10 @@ func searchWindow(projectName string) []string {
 	byClassArr := strings.Split(string(byClass), "\n")
 
 	return intersect(byNameArr, byClassArr)
+}
+
+func projectRegexp(windowName string) string {
+	return fmt.Sprintf("^%s( – |$)", windowName)
 }
 
 func pickProject(projects []string) string {
