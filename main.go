@@ -35,7 +35,8 @@ func main() {
 
 func searchProjects(rootDir string, maxDepth int) []string {
 	projects := make([]string, 0)
-	_ = filepath.WalkDir(rootDir, func(path string, d fs.DirEntry, err error) error {
+
+	err := filepath.WalkDir(rootDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -53,6 +54,9 @@ func searchProjects(rootDir string, maxDepth int) []string {
 		}
 		return nil
 	})
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	return projects
 }
@@ -89,7 +93,10 @@ func pickProject(projects []string) string {
 	go func() {
 		defer stdin.Close()
 		for _, p := range projects {
-			_, _ = io.WriteString(stdin, p+"\n")
+			_, err = io.WriteString(stdin, p+"\n")
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}()
 
@@ -104,12 +111,15 @@ func pickProject(projects []string) string {
 func focusWindow(windowId string) {
 	_, err := i3.RunCommand(fmt.Sprintf("[id=\"%s\"] focus", windowId))
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 }
 
 func openProject(idePath string, projectPath string) {
-	_ = exec.Command(idePath, projectPath).Run()
+	err := exec.Command(idePath, projectPath).Run()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func intersect(a []string, b []string) []string {
