@@ -28,8 +28,6 @@ func main() {
 	windowIds := searchWindow(projectName)
 	if len(windowIds) == 0 {
 		openProject(*idePath, *rootDir+projectName)
-	} else if len(windowIds) == 1 {
-		focusWindow(windowIds[0])
 	} else {
 		focusWindow(windowIds[0])
 	}
