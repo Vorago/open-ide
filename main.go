@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"go.i3wm.org/i3/v4"
 	"io"
 	"io/fs"
 	"log"
@@ -25,12 +24,7 @@ func main() {
 	projectNames := searchProjects(*rootDir, *maxDepth)
 	projectName := pickProject(projectNames)
 
-	windowIds := searchWindow(projectName)
-	if len(windowIds) == 0 {
-		openProject(*idePath, *rootDir+projectName)
-	} else {
-		focusWindow(windowIds[0])
-	}
+	openProject(*idePath, *rootDir+projectName)
 }
 
 func searchProjects(rootDir string, maxDepth int) []string {
@@ -59,24 +53,6 @@ func searchProjects(rootDir string, maxDepth int) []string {
 	}
 
 	return projects
-}
-
-func searchWindow(projectName string) []string {
-	windowName := filepath.Base(projectName)
-	byName, err := exec.Command("xdotool", "search", "--name", projectRegexp(windowName)).Output()
-	if err != nil {
-		return make([]string, 0)
-	}
-
-	byClass, err := exec.Command("xdotool", "search", "--class", "jetbrains-idea").Output()
-	if err != nil {
-		return make([]string, 0)
-	}
-
-	byNameArr := strings.Split(string(byName), "\n")
-	byClassArr := strings.Split(string(byClass), "\n")
-
-	return intersect(byNameArr, byClassArr)
 }
 
 func projectRegexp(windowName string) string {
@@ -108,34 +84,9 @@ func pickProject(projects []string) string {
 	return strings.TrimSpace(string(out))
 }
 
-func focusWindow(windowId string) {
-	_, err := i3.RunCommand(fmt.Sprintf("[id=\"%s\"] focus", windowId))
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
 func openProject(idePath string, projectPath string) {
 	err := exec.Command(idePath, projectPath).Run()
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func intersect(a []string, b []string) []string {
-	res := make([]string, 0)
-
-	hash := make(map[string]bool)
-
-	for _, v := range b {
-		hash[v] = true
-	}
-
-	for i := 0; i < len(a); i++ {
-		if hash[a[i]] {
-			res = append(res, a[i])
-		}
-	}
-
-	return res
 }
